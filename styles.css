@@ -1,0 +1,219 @@
+:root {
+  color-scheme: light;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+  --bg: #0f172a;
+  --text: #f9fafb;
+  --muted: #9ca3af;
+  --accent: #22c55e;
+  --agent: #0ea5e9;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #1d4ed8 0%, var(--bg) 45%);
+  color: var(--text);
+}
+
+.app {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 2rem 1rem 3rem;
+}
+
+.hero {
+  margin-bottom: 1rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: 0.25rem 0.65rem;
+  background: rgba(34, 197, 94, 0.2);
+  border: 1px solid rgba(34, 197, 94, 0.5);
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.subtitle {
+  color: var(--muted);
+}
+
+.panel {
+  background: rgba(17, 24, 39, 0.92);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-top: 1rem;
+}
+
+.messages {
+  min-height: 360px;
+  max-height: 520px;
+  overflow-y: auto;
+  padding: 0.5rem;
+}
+
+.msg {
+  padding: 0.75rem;
+  border-radius: 10px;
+  margin-bottom: 0.65rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.msg.agent {
+  background: rgba(14, 165, 233, 0.18);
+  border: 1px solid rgba(14, 165, 233, 0.6);
+}
+
+.msg.user {
+  background: rgba(55, 65, 81, 0.7);
+  border: 1px solid rgba(156, 163, 175, 0.4);
+}
+
+.answer-form {
+  border-top: 1px solid rgba(156, 163, 175, 0.25);
+  padding-top: 1rem;
+}
+
+.answer-form label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--muted);
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+}
+
+input {
+  flex: 1;
+  border-radius: 8px;
+  border: 1px solid rgba(156, 163, 175, 0.5);
+  background: #0b1220;
+  color: var(--text);
+  padding: 0.7rem;
+}
+
+button {
+  background: var(--accent);
+  color: #052e16;
+  border: none;
+  border-radius: 8px;
+  padding: 0.7rem 1rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.hidden {
+  display: none;
+}
+
+.risk-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.7rem;
+}
+
+.risk {
+  font-size: 0.85rem;
+  border: 1px solid;
+  border-radius: 999px;
+  padding: 0.25rem 0.6rem;
+}
+
+.risk.critical {
+  border-color: rgba(239, 68, 68, 0.9);
+  background: rgba(239, 68, 68, 0.2);
+}
+
+.risk.warning {
+  border-color: rgba(234, 179, 8, 0.9);
+  background: rgba(234, 179, 8, 0.2);
+}
+
+.risk.info {
+  border-color: rgba(56, 189, 248, 0.9);
+  background: rgba(56, 189, 248, 0.2);
+}
+
+.roi-results {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.kpi {
+  background: rgba(31, 41, 55, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  border-radius: 10px;
+  padding: 0.7rem;
+}
+
+.kpi p {
+  margin: 0;
+}
+
+.kpi .label {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.kpi .value {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-top: 0.25rem;
+}
+
+#roiChart {
+  width: 100%;
+  background: rgba(3, 7, 18, 0.6);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  border-radius: 10px;
+}
+
+.actions {
+  margin-top: 0.9rem;
+  display: flex;
+  gap: 0.6rem;
+}
+
+
+.score-card {
+  margin-bottom: 0.75rem;
+}
+
+.action-plan {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  color: var(--text);
+}
+
+.action-plan li {
+  margin-bottom: 0.4rem;
+}
+
+.risk.success {
+  border-color: rgba(34, 197, 94, 0.9);
+  background: rgba(34, 197, 94, 0.2);
+}
+
+
+.demo-panel {
+  margin-bottom: 0.5rem;
+}
+
+.demo-panel h2 {
+  margin: 0 0 0.3rem;
+}

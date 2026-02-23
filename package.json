@@ -1,0 +1,15 @@
+{
+  "name": "diagia-audit-web",
+  "version": "1.0.0",
+  "private": true,
+  "description": "DiagIA audit maturity web app - production server",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "node --test tests/audit-core.test.js && node --test tests/roi-core.test.js && node --test tests/server.test.js",
+    "check": "node --check app.js && node --check audit-core.js && node --check roi-core.js && node --check server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
