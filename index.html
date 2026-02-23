@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DiagIA — Audit IA</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="app">
+      <header class="hero">
+        <p class="badge">DiagIA • Audit IA</p>
+        <h1>Audit de maturité IA générative</h1>
+        <p class="subtitle">Évaluez votre niveau sur 5 piliers et obtenez un plan d'action 30/60/90 jours.</p>
+      </header>
+
+      <section class="panel" aria-live="polite">
+        <div id="messages" class="messages"></div>
+        <form id="answerForm" class="answer-form">
+          <label for="answerInput">Votre réponse</label>
+          <div class="row">
+            <input id="answerInput" type="text" autocomplete="off" required />
+            <button type="submit">Envoyer</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="panel hidden" id="reportPanel">
+        <h2>Rapport d'audit IA</h2>
+        <div id="riskBadges" class="risk-badges"></div>
+        <div id="scoreCard" class="score-card"></div>
+        <div id="pillarCards" class="roi-results"></div>
+        <h3>Priorités recommandées</h3>
+        <ul id="actionPlan" class="action-plan"></ul>
+        <div class="actions">
+          <button id="downloadJson" type="button">Exporter JSON</button>
+          <button id="downloadCsv" type="button">Exporter CSV</button>
+        </div>
+      </section>
+    </main>
+
+    <script src="audit-core.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
