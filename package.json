@@ -6,7 +6,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "test": "node --test tests/audit-core.test.js && node --test tests/roi-core.test.js",
+    "test": "node --test tests/audit-core.test.js && node --test tests/roi-core.test.js && node --test tests/server.test.js",
     "check": "node --check app.js && node --check audit-core.js && node --check roi-core.js && node --check server.js"
   },
   "engines": {

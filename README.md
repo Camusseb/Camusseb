@@ -34,6 +34,11 @@ Endpoints:
 - `GET /` application
 - `GET /healthz` healthcheck
 
+Sécurité HTTP intégrée:
+- `Content-Security-Policy`
+- `X-Content-Type-Options: nosniff`
+- `X-Frame-Options: DENY`
+
 ### Option 2 — Docker
 
 ```bash
@@ -53,6 +58,8 @@ curl http://localhost:8080/healthz
 npm run check
 npm run test
 ```
+
+Le script `npm run test` inclut les tests de logique métier et les tests serveur (healthcheck, méthodes HTTP, anti-traversal).
 
 ## Démo rapide (audit faible maturité)
 
