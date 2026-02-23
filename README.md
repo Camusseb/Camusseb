@@ -1,16 +1,16 @@
 # DiagIA — Audit IA Web
 
-Application web statique pour conduire un **audit de maturité IA générative** (TPE, PME, établissements scolaires).
+Application web pour conduire un **audit de maturité IA générative** (TPE, PME, établissements scolaires).
 
-## Ce que fait cette version
+## Fonctionnalités
 
-- Questionnaire guidé orienté **audit IA** (gouvernance, conformité, usages, compétences, pilotage).
-- Score de maturité global **/100** et score par pilier **/20**.
-- Détection des risques clés (gouvernance faible, conformité, shadow AI).
-- Plan d’action automatique **30/60/90 jours**.
+- Questionnaire guidé orienté audit IA.
+- Score global **/100** + score par pilier **/20**.
+- Détection des risques (gouvernance, conformité, shadow AI).
+- Plan d’action **30/60/90 jours**.
 - Export des résultats en **JSON/CSV**.
 
-## Lancer en local
+## Lancement local (dev)
 
 ```bash
 python3 -m http.server 8000
@@ -18,17 +18,43 @@ python3 -m http.server 8000
 
 Puis ouvrir `http://localhost:8000`.
 
+## Mise en production
+
+### Option 1 — Serveur Node natif
+
+```bash
+npm run start
+```
+
+Variables:
+- `PORT` (défaut `8080`)
+- `HOST` (défaut `0.0.0.0`)
+
+Endpoints:
+- `GET /` application
+- `GET /healthz` healthcheck
+
+### Option 2 — Docker
+
+```bash
+docker build -t diagia-audit:latest .
+docker run -d --name diagia-audit -p 8080:8080 diagia-audit:latest
+```
+
+Puis vérifier:
+
+```bash
+curl http://localhost:8080/healthz
+```
+
 ## Tests
 
 ```bash
-node --check app.js
-node --check audit-core.js
-node --test tests/audit-core.test.js
+npm run check
+npm run test
 ```
 
-## Démo rapide
-
-Exemple de réponses (maturité faible pour voir les recommandations):
+## Démo rapide (audit faible maturité)
 
 1. `MonOrg, PME`
 2. `20`
@@ -43,9 +69,3 @@ Exemple de réponses (maturité faible pour voir les recommandations):
 11. `non`
 12. `non`
 13. `non`
-
-À la fin, vérifier:
-- score global,
-- 5 scores piliers,
-- plan d'action,
-- export JSON/CSV.
