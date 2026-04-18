@@ -1,13 +1,1140 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Little Secret Online</title>
-    <link rel="icon" type="image/svg+xml" href="/logo.svg" />
+    <title>Drone Defense - Guerre des Drones</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        overflow: hidden;
+        background: #1a1a2e;
+      }
+      
+      #game-container {
+        position: relative;
+        width: 100vw;
+        height: 100vh;
+      }
+      
+      #ui-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 100;
+      }
+      
+      #top-bar {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.4) 100%);
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        pointer-events: auto;
+      }
+      
+      .resource-display {
+        display: flex;
+        gap: 30px;
+        color: #fff;
+        font-size: 18px;
+        font-weight: bold;
+      }
+      
+      .resource {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      
+      .resource-icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+      }
+      
+      #money { color: #ffd700; }
+      #wave { color: #ff6b6b; }
+      #lives { color: #4ecdc4; }
+      
+      #tower-panel {
+        position: absolute;
+        bottom: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.9) 100%);
+        padding: 20px;
+        border-radius: 15px;
+        display: flex;
+        gap: 15px;
+        pointer-events: auto;
+        border: 2px solid #444;
+      }
+      
+      .tower-button {
+        background: linear-gradient(180deg, #4a4a6a 0%, #2a2a4a 100%);
+        border: 2px solid #6a6a8a;
+        border-radius: 10px;
+        padding: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+        min-width: 120px;
+        text-align: center;
+      }
+      
+      .tower-button:hover {
+        transform: translateY(-5px);
+        border-color: #8a8aaa;
+        box-shadow: 0 5px 20px rgba(100, 100, 200, 0.3);
+      }
+      
+      .tower-button.selected {
+        border-color: #ffd700;
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      }
+      
+      .tower-button.disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .tower-name {
+        color: #fff;
+        font-weight: bold;
+        margin-bottom: 5px;
+        font-size: 14px;
+      }
+      
+      .tower-cost {
+        color: #ffd700;
+        font-size: 16px;
+        font-weight: bold;
+      }
+      
+      .tower-stats {
+        color: #aaa;
+        font-size: 11px;
+        margin-top: 5px;
+      }
+      
+      #start-screen, #game-over-screen {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        pointer-events: auto;
+        z-index: 200;
+      }
+      
+      .hidden {
+        display: none !important;
+      }
+      
+      h1 {
+        color: #fff;
+        font-size: 48px;
+        margin-bottom: 20px;
+        text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+      }
+      
+      h2 {
+        color: #ff6b6b;
+        font-size: 36px;
+        margin-bottom: 30px;
+      }
+      
+      .subtitle {
+        color: #aaa;
+        font-size: 18px;
+        margin-bottom: 40px;
+        max-width: 600px;
+        text-align: center;
+        line-height: 1.6;
+      }
+      
+      .btn-primary {
+        background: linear-gradient(180deg, #ffd700 0%, #ffaa00 100%);
+        border: none;
+        padding: 20px 60px;
+        font-size: 24px;
+        font-weight: bold;
+        color: #1a1a2e;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+      }
+      
+      .btn-primary:hover {
+        transform: scale(1.1);
+        box-shadow: 0 0 30px rgba(255, 215, 0, 0.6);
+      }
+      
+      .stats-final {
+        color: #fff;
+        font-size: 20px;
+        margin: 20px 0;
+        text-align: center;
+      }
+      
+      #wave-notification {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: rgba(0, 0, 0, 0.8);
+        padding: 30px 60px;
+        border-radius: 20px;
+        border: 3px solid #ff6b6b;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.5s;
+      }
+      
+      #wave-notification.show {
+        opacity: 1;
+      }
+      
+      #wave-notification h3 {
+        color: #ff6b6b;
+        font-size: 32px;
+        margin-bottom: 10px;
+      }
+      
+      #wave-notification p {
+        color: #fff;
+        font-size: 18px;
+      }
+      
+      #upgrade-panel {
+        position: absolute;
+        right: 20px;
+        top: 100px;
+        background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0.9) 100%);
+        padding: 20px;
+        border-radius: 15px;
+        pointer-events: auto;
+        border: 2px solid #444;
+        min-width: 200px;
+      }
+      
+      #upgrade-panel h4 {
+        color: #fff;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+      
+      .upgrade-btn {
+        background: linear-gradient(180deg, #4a6a4a 0%, #2a4a2a 100%);
+        border: 2px solid #6a8a6a;
+        border-radius: 8px;
+        padding: 10px;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-bottom: 10px;
+        width: 100%;
+        color: #fff;
+        font-size: 13px;
+      }
+      
+      .upgrade-btn:hover:not(:disabled) {
+        border-color: #8aaa8a;
+        transform: translateX(-3px);
+      }
+      
+      .upgrade-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+      
+      .no-selection {
+        color: #888;
+        font-style: italic;
+        font-size: 13px;
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
+    <div id="game-container">
+      <div id="ui-overlay">
+        <!-- Start Screen -->
+        <div id="start-screen">
+          <h1>🛡️ DRONE DEFENSE</h1>
+          <p class="subtitle">
+            Inspiré par la guerre moderne des drones en Ukraine et en Russie.<br>
+            Défendez votre base contre les vagues de drones ennemis.<br>
+            Placez stratégiquement vos défenses : tourelles, snipers et drones anti-drones.
+          </p>
+          <button class="btn-primary" onclick="startGame()">COMMENCER LA MISSION</button>
+        </div>
+        
+        <!-- Game Over Screen -->
+        <div id="game-over-screen" class="hidden">
+          <h2>💥 BASE DÉTRUITE 💥</h2>
+          <p class="stats-final" id="final-wave">Vagues survivées : 0</p>
+          <p class="stats-final" id="final-score">Score : 0</p>
+          <button class="btn-primary" onclick="restartGame()">REJOUER</button>
+        </div>
+        
+        <!-- Top Bar -->
+        <div id="top-bar" class="hidden">
+          <div class="resource-display">
+            <div class="resource" id="money">
+              <span>💰</span>
+              <span id="money-value">1000</span>
+            </div>
+            <div class="resource" id="lives">
+              <span>❤️</span>
+              <span id="lives-value">20</span>
+            </div>
+            <div class="resource" id="wave">
+              <span>🌊</span>
+              <span id="wave-value">1</span>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Tower Selection Panel -->
+        <div id="tower-panel" class="hidden">
+          <div class="tower-button" onclick="selectTower('basic')" id="tower-basic">
+            <div class="tower-name">🔫 Tourelle</div>
+            <div class="tower-cost">150$</div>
+            <div class="tower-stats">Portée: Moyenne<br>Dégâts: Faibles<br>Rapide</div>
+          </div>
+          <div class="tower-button" onclick="selectTower('sniper')" id="tower-sniper">
+            <div class="tower-name">🎯 Sniper</div>
+            <div class="tower-cost">300$</div>
+            <div class="tower-stats">Portée: Longue<br>Dégâts: Élevés<br>Lent</div>
+          </div>
+          <div class="tower-button" onclick="selectTower('anti-drone')" id="tower-anti-drone">
+            <div class="tower-name">🚁 Anti-Drones</div>
+            <div class="tower-cost">400$</div>
+            <div class="tower-stats">Zone: Large<br>Dégâts: Moyens<br>Spécial</div>
+          </div>
+        </div>
+        
+        <!-- Upgrade Panel -->
+        <div id="upgrade-panel" class="hidden">
+          <h4>🔧 AMÉLIORATIONS</h4>
+          <div id="upgrade-content">
+            <p class="no-selection">Sélectionnez une tour</p>
+          </div>
+        </div>
+        
+        <!-- Wave Notification -->
+        <div id="wave-notification">
+          <h3 id="wave-title">VAGUE 1</h3>
+          <p id="wave-desc">10 drones approchent!</p>
+        </div>
+      </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+      // ==================== GAME CONFIGURATION ====================
+      const CONFIG = {
+        towers: {
+          basic: { cost: 150, range: 8, damage: 15, fireRate: 0.5, color: 0x4a90d9 },
+          sniper: { cost: 300, range: 15, damage: 100, fireRate: 2, color: 0x2d5016 },
+          'anti-drone': { cost: 400, range: 6, damage: 40, fireRate: 1, color: 0xd94a4a }
+        },
+        upgradeCostMultiplier: 0.5,
+        baseLives: 20,
+        startMoney: 1000
+      };
+      
+      // ==================== GAME STATE ====================
+      let gameState = {
+        money: CONFIG.startMoney,
+        lives: CONFIG.baseLives,
+        wave: 0,
+        score: 0,
+        isPlaying: false,
+        selectedTowerType: null,
+        selectedTower: null,
+        towers: [],
+        enemies: [],
+        projectiles: [],
+        explosions: [],
+        path: [],
+        waveInProgress: false,
+        enemiesToSpawn: 0,
+        spawnTimer: 0,
+        spawnInterval: 1000
+      };
+      
+      // ==================== THREE.JS SETUP ====================
+      let scene, camera, renderer;
+      let ground, basePath;
+      let towerGroup, enemyGroup, projectileGroup, explosionGroup;
+      
+      function initThreeJS() {
+        scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x1a1a2e);
+        scene.fog = new THREE.Fog(0x1a1a2e, 50, 150);
+        
+        camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.set(0, 30, 40);
+        camera.lookAt(0, 0, 0);
+        
+        renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.shadowMap.enabled = true;
+        document.getElementById('game-container').appendChild(renderer.domElement);
+        
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
+        scene.add(ambientLight);
+        
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.8);
+        directionalLight.position.set(50, 50, 50);
+        directionalLight.castShadow = true;
+        scene.add(directionalLight);
+        
+        // Groups
+        towerGroup = new THREE.Group();
+        enemyGroup = new THREE.Group();
+        projectileGroup = new THREE.Group();
+        explosionGroup = new THREE.Group();
+        scene.add(towerGroup);
+        scene.add(enemyGroup);
+        scene.add(projectileGroup);
+        scene.add(explosionGroup);
+        
+        createEnvironment();
+        createPath();
+      }
+      
+      function createEnvironment() {
+        // Ground
+        const groundGeometry = new THREE.PlaneGeometry(100, 100);
+        const groundMaterial = new THREE.MeshStandardMaterial({ 
+          color: 0x3a5a3a,
+          roughness: 0.8
+        });
+        ground = new THREE.Mesh(groundGeometry, groundMaterial);
+        ground.rotation.x = -Math.PI / 2;
+        ground.receiveShadow = true;
+        scene.add(ground);
+        
+        // Grid helper for tactical feel
+        const gridHelper = new THREE.GridHelper(100, 20, 0x444444, 0x222222);
+        gridHelper.position.y = 0.01;
+        scene.add(gridHelper);
+      }
+      
+      function createPath() {
+        // Create a winding path for enemies
+        gameState.path = [
+          { x: -45, z: 0 },
+          { x: -30, z: 0 },
+          { x: -30, z: -20 },
+          { x: -10, z: -20 },
+          { x: -10, z: 10 },
+          { x: 15, z: 10 },
+          { x: 15, z: -15 },
+          { x: 35, z: -15 },
+          { x: 35, z: 0 },
+          { x: 45, z: 0 } // Base location
+        ];
+        
+        // Draw path visually
+        const pathShape = new THREE.Shape();
+        pathShape.moveTo(gameState.path[0].x, gameState.path[0].z);
+        for (let i = 1; i < gameState.path.length; i++) {
+          pathShape.lineTo(gameState.path[i].x, gameState.path[i].z);
+        }
+        
+        const pathGeometry = new THREE.ExtrudeGeometry(pathShape, {
+          depth: 0.2,
+          bevelEnabled: false
+        });
+        const pathMaterial = new THREE.MeshStandardMaterial({ 
+          color: 0x8b7355,
+          transparent: true,
+          opacity: 0.6
+        });
+        basePath = new THREE.Mesh(pathGeometry, pathMaterial);
+        basePath.rotation.x = -Math.PI / 2;
+        basePath.position.y = 0.02;
+        scene.add(basePath);
+        
+        // Base marker
+        const baseGeometry = new THREE.CylinderGeometry(3, 3, 2, 8);
+        const baseMaterial = new THREE.MeshStandardMaterial({ color: 0x4ecdc4 });
+        const baseMarker = new THREE.Mesh(baseGeometry, baseMaterial);
+        baseMarker.position.set(45, 1, 0);
+        scene.add(baseMarker);
+        
+        // Spawn marker
+        const spawnGeometry = new THREE.SphereGeometry(2, 8, 8);
+        const spawnMaterial = new THREE.MeshStandardMaterial({ color: 0xff6b6b });
+        const spawnMarker = new THREE.Mesh(spawnGeometry, spawnMaterial);
+        spawnMarker.position.set(-45, 2, 0);
+        scene.add(spawnMarker);
+      }
+      
+      // ==================== TOWER CREATION ====================
+      function createTower(type, position) {
+        const config = CONFIG.towers[type];
+        const tower = {
+          type: type,
+          position: { x: position.x, z: position.z },
+          range: config.range,
+          damage: config.damage,
+          fireRate: config.fireRate,
+          lastFire: 0,
+          level: 1,
+          mesh: null,
+          rangeIndicator: null
+        };
+        
+        // Create tower mesh based on type
+        let geometry, material;
+        switch(type) {
+          case 'basic':
+            geometry = new THREE.CylinderGeometry(1, 1.5, 3, 8);
+            material = new THREE.MeshStandardMaterial({ color: config.color });
+            break;
+          case 'sniper':
+            geometry = new THREE.CylinderGeometry(0.8, 1.2, 5, 8);
+            material = new THREE.MeshStandardMaterial({ color: config.color });
+            break;
+          case 'anti-drone':
+            geometry = new THREE.BoxGeometry(2.5, 2, 2.5);
+            material = new THREE.MeshStandardMaterial({ color: config.color });
+            break;
+        }
+        
+        tower.mesh = new THREE.Mesh(geometry, material);
+        tower.mesh.position.set(position.x, 1.5, position.z);
+        tower.mesh.castShadow = true;
+        towerGroup.add(tower.mesh);
+        
+        // Range indicator
+        const rangeGeometry = new THREE.RingGeometry(config.range - 0.2, config.range, 32);
+        const rangeMaterial = new THREE.MeshBasicMaterial({ 
+          color: config.color, 
+          transparent: true, 
+          opacity: 0.3,
+          side: THREE.DoubleSide
+        });
+        tower.rangeIndicator = new THREE.Mesh(rangeGeometry, rangeMaterial);
+        tower.rangeIndicator.rotation.x = -Math.PI / 2;
+        tower.rangeIndicator.position.y = 0.1;
+        tower.mesh.add(tower.rangeIndicator);
+        
+        gameState.towers.push(tower);
+        return tower;
+      }
+      
+      // ==================== ENEMY CREATION ====================
+      function createEnemy(wave) {
+        const isFast = Math.random() < 0.3 + wave * 0.05;
+        const isTank = Math.random() < 0.1 + wave * 0.02;
+        
+        let health, speed, reward, color;
+        
+        if (isTank) {
+          health = 200 + wave * 30;
+          speed = 1.5;
+          reward = 30;
+          color = 0x8b0000;
+        } else if (isFast) {
+          health = 40 + wave * 8;
+          speed = 4 + wave * 0.3;
+          reward = 15;
+          color = 0xff6600;
+        } else {
+          health = 80 + wave * 15;
+          speed = 2.5 + wave * 0.2;
+          reward = 20;
+          color = 0xcc0000;
+        }
+        
+        const enemy = {
+          position: { x: gameState.path[0].x, z: gameState.path[0].z },
+          pathIndex: 0,
+          progress: 0,
+          health: health,
+          maxHealth: health,
+          speed: speed,
+          reward: reward,
+          mesh: null,
+          healthBar: null
+        };
+        
+        // Drone mesh
+        const droneGeometry = new THREE.ConeGeometry(0.8, 2, 8);
+        const droneMaterial = new THREE.MeshStandardMaterial({ color: color });
+        enemy.mesh = new THREE.Mesh(droneGeometry, droneMaterial);
+        enemy.mesh.position.set(enemy.position.x, 1, enemy.position.z);
+        enemy.mesh.rotation.x = Math.PI / 2;
+        enemy.mesh.castShadow = true;
+        enemyGroup.add(enemy.mesh);
+        
+        // Health bar
+        const healthBarGeometry = new THREE.PlaneGeometry(2, 0.3);
+        const healthBarMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        enemy.healthBar = new THREE.Mesh(healthBarGeometry, healthBarMaterial);
+        enemy.healthBar.position.y = 2;
+        enemy.mesh.add(enemy.healthBar);
+        
+        gameState.enemies.push(enemy);
+      }
+      
+      // ==================== PROJECTILE & EFFECTS ====================
+      function createProjectile(startPos, targetPos, damage, isArea = false) {
+        const geometry = new THREE.SphereGeometry(0.3, 8, 8);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: isArea ? 0xff4444 : 0xffff00 
+        });
+        const projectile = new THREE.Mesh(geometry, material);
+        projectile.position.copy(startPos);
+        projectileGroup.add(projectile);
+        
+        gameState.projectiles.push({
+          mesh: projectile,
+          targetPos: targetPos.clone(),
+          damage: damage,
+          isArea: isArea,
+          progress: 0,
+          speed: 0.3
+        });
+      }
+      
+      function createExplosion(position, radius, damage) {
+        const geometry = new THREE.SphereGeometry(0.5, 16, 16);
+        const material = new THREE.MeshBasicMaterial({ 
+          color: 0xff6600, 
+          transparent: true, 
+          opacity: 0.8 
+        });
+        const explosion = new THREE.Mesh(geometry, material);
+        explosion.position.copy(position);
+        explosionGroup.add(explosion);
+        
+        gameState.explosions.push({
+          mesh: explosion,
+          radius: radius,
+          damage: damage,
+          age: 0,
+          maxAge: 500
+        });
+        
+        // Apply area damage
+        gameState.enemies.forEach(enemy => {
+          const dx = enemy.position.x - position.x;
+          const dz = enemy.position.z - position.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          if (dist <= radius) {
+            damageEnemy(enemy, damage);
+          }
+        });
+      }
+      
+      // ==================== GAME LOGIC ====================
+      function damageEnemy(enemy, damage) {
+        enemy.health -= damage;
+        
+        // Update health bar
+        const healthPercent = enemy.health / enemy.maxHealth;
+        enemy.healthBar.scale.x = healthPercent;
+        enemy.healthBar.material.color.setHex(
+          healthPercent > 0.5 ? 0x00ff00 : 
+          healthPercent > 0.25 ? 0xffff00 : 0xff0000
+        );
+        
+        if (enemy.health <= 0) {
+          killEnemy(enemy);
+        }
+      }
+      
+      function killEnemy(enemy) {
+        gameState.money += enemy.reward;
+        gameState.score += enemy.reward * 10;
+        
+        enemyGroup.remove(enemy.mesh);
+        const index = gameState.enemies.indexOf(enemy);
+        if (index > -1) {
+          gameState.enemies.splice(index, 1);
+        }
+        
+        updateUI();
+      }
+      
+      function enemyReachedBase(enemy) {
+        gameState.lives--;
+        killEnemy(enemy);
+        updateUI();
+        
+        if (gameState.lives <= 0) {
+          gameOver();
+        }
+      }
+      
+      function updateTowers(deltaTime) {
+        const currentTime = Date.now();
+        
+        gameState.towers.forEach(tower => {
+          if (currentTime - tower.lastFire < tower.fireRate * 1000) return;
+          
+          // Find target
+          let target = null;
+          let minDist = Infinity;
+          
+          gameState.enemies.forEach(enemy => {
+            const dx = enemy.position.x - tower.position.x;
+            const dz = enemy.position.z - tower.position.z;
+            const dist = Math.sqrt(dx * dx + dz * dz);
+            
+            if (dist <= tower.range && dist < minDist) {
+              minDist = dist;
+              target = enemy;
+            }
+          });
+          
+          if (target) {
+            tower.lastFire = currentTime;
+            
+            if (tower.type === 'anti-drone') {
+              // Area damage
+              createExplosion(
+                new THREE.Vector3(target.position.x, 1, target.position.z),
+                tower.range,
+                tower.damage
+              );
+            } else {
+              // Single target
+              createProjectile(
+                tower.mesh.position,
+                new THREE.Vector3(target.position.x, 1, target.position.z),
+                tower.damage
+              );
+              
+              setTimeout(() => {
+                damageEnemy(target, tower.damage);
+              }, 200);
+            }
+          }
+        });
+      }
+      
+      function updateProjectiles(deltaTime) {
+        for (let i = gameState.projectiles.length - 1; i >= 0; i--) {
+          const proj = gameState.projectiles[i];
+          proj.progress += proj.speed;
+          
+          const startPos = proj.mesh.position.clone();
+          proj.mesh.position.lerpVectors(startPos, proj.targetPos, proj.progress);
+          
+          if (proj.progress >= 1) {
+            projectileGroup.remove(proj.mesh);
+            gameState.projectiles.splice(i, 1);
+          }
+        }
+      }
+      
+      function updateExplosions(deltaTime) {
+        for (let i = gameState.explosions.length - 1; i >= 0; i--) {
+          const exp = gameState.explosions[i];
+          exp.age += deltaTime;
+          
+          const scale = 1 + (exp.age / exp.maxAge) * 3;
+          exp.mesh.scale.set(scale, scale, scale);
+          exp.mesh.material.opacity = 0.8 * (1 - exp.age / exp.maxAge);
+          
+          if (exp.age >= exp.maxAge) {
+            explosionGroup.remove(exp.mesh);
+            gameState.explosions.splice(i, 1);
+          }
+        }
+      }
+      
+      function updateEnemies(deltaTime) {
+        const moveDistance = deltaTime * 0.001;
+        
+        for (let i = gameState.enemies.length - 1; i >= 0; i--) {
+          const enemy = gameState.enemies[i];
+          const currentWaypoint = gameState.path[enemy.pathIndex];
+          const nextWaypoint = gameState.path[enemy.pathIndex + 1];
+          
+          if (!nextWaypoint) {
+            enemyReachedBase(enemy);
+            continue;
+          }
+          
+          const dx = nextWaypoint.x - currentWaypoint.x;
+          const dz = nextWaypoint.z - currentWaypoint.z;
+          const segmentLength = Math.sqrt(dx * dx + dz * dz);
+          
+          enemy.progress += (enemy.speed * moveDistance) / segmentLength;
+          
+          if (enemy.progress >= 1) {
+            enemy.pathIndex++;
+            enemy.progress = 0;
+          }
+          
+          // Interpolate position
+          enemy.position.x = currentWaypoint.x + dx * enemy.progress;
+          enemy.position.z = currentWaypoint.z + dz * enemy.progress;
+          
+          enemy.mesh.position.set(enemy.position.x, 1, enemy.position.z);
+          
+          // Rotate towards movement direction
+          const angle = Math.atan2(dz, dx);
+          enemy.mesh.rotation.z = -angle;
+        }
+      }
+      
+      function spawnEnemies() {
+        if (gameState.enemiesToSpawn > 0) {
+          gameState.spawnTimer += 16;
+          if (gameState.spawnTimer >= gameState.spawnInterval) {
+            gameState.spawnTimer = 0;
+            createEnemy(gameState.wave);
+            gameState.enemiesToSpawn--;
+          }
+        } else if (gameState.enemies.length === 0) {
+          // Wave complete
+          gameState.waveInProgress = false;
+          setTimeout(nextWave, 2000);
+        }
+      }
+      
+      function nextWave() {
+        if (!gameState.isPlaying) return;
+        
+        gameState.wave++;
+        gameState.enemiesToSpawn = 10 + gameState.wave * 5;
+        gameState.spawnInterval = Math.max(300, 1000 - gameState.wave * 50);
+        gameState.waveInProgress = true;
+        
+        // Show wave notification
+        const notification = document.getElementById('wave-notification');
+        document.getElementById('wave-title').textContent = `VAGUE ${gameState.wave}`;
+        document.getElementById('wave-desc').textContent = `${gameState.enemiesToSpawn} drones approchent!`;
+        notification.classList.add('show');
+        setTimeout(() => notification.classList.remove('show'), 2000);
+        
+        updateUI();
+      }
+      
+      // ==================== UI FUNCTIONS ====================
+      function updateUI() {
+        document.getElementById('money-value').textContent = Math.floor(gameState.money);
+        document.getElementById('lives-value').textContent = gameState.lives;
+        document.getElementById('wave-value').textContent = gameState.wave;
+        
+        // Update tower buttons availability
+        Object.keys(CONFIG.towers).forEach(type => {
+          const btn = document.getElementById(`tower-${type}`);
+          if (gameState.money < CONFIG.towers[type].cost) {
+            btn.classList.add('disabled');
+          } else {
+            btn.classList.remove('disabled');
+          }
+        });
+        
+        // Update upgrade panel
+        updateUpgradePanel();
+      }
+      
+      function selectTower(type) {
+        if (gameState.money < CONFIG.towers[type].cost) return;
+        
+        // Deselect previous
+        document.querySelectorAll('.tower-button').forEach(btn => {
+          btn.classList.remove('selected');
+        });
+        
+        if (gameState.selectedTowerType === type) {
+          gameState.selectedTowerType = null;
+        } else {
+          gameState.selectedTowerType = type;
+          document.getElementById(`tower-${type}`).classList.add('selected');
+        }
+      }
+      
+      function updateUpgradePanel() {
+        const content = document.getElementById('upgrade-content');
+        
+        if (!gameState.selectedTower) {
+          content.innerHTML = '<p class="no-selection">Sélectionnez une tour</p>';
+          return;
+        }
+        
+        const tower = gameState.selectedTower;
+        const upgradeCost = Math.floor(CONFIG.towers[tower.type].cost * CONFIG.upgradeCostMultiplier * tower.level);
+        const canAfford = gameState.money >= upgradeCost;
+        
+        content.innerHTML = `
+          <div style="color: #fff; margin-bottom: 10px;">
+            <strong>Niveau ${tower.level}</strong><br>
+            Dégâts: ${tower.damage}<br>
+            Portée: ${tower.range}
+          </div>
+          <button class="upgrade-btn" ${canAfford ? '' : 'disabled'} onclick="upgradeSelectedTower()">
+            🔼 Améliorer (${upgradeCost}$)
+          </button>
+          <button class="upgrade-btn" style="background: linear-gradient(180deg, #6a4a4a 0%, #4a2a2a 100%); border-color: #8a6a6a;" onclick="sellSelectedTower()">
+            💰 Vendre (${Math.floor(CONFIG.towers[tower.type].cost * 0.7)}$)
+          </button>
+        `;
+      }
+      
+      function upgradeSelectedTower() {
+        const tower = gameState.selectedTower;
+        if (!tower) return;
+        
+        const upgradeCost = Math.floor(CONFIG.towers[tower.type].cost * CONFIG.upgradeCostMultiplier * tower.level);
+        if (gameState.money < upgradeCost) return;
+        
+        gameState.money -= upgradeCost;
+        tower.level++;
+        tower.damage *= 1.3;
+        tower.range *= 1.1;
+        
+        // Visual feedback
+        tower.mesh.scale.multiplyScalar(1.1);
+        
+        updateUI();
+      }
+      
+      function sellSelectedTower() {
+        const tower = gameState.selectedTower;
+        if (!tower) return;
+        
+        const sellValue = Math.floor(CONFIG.towers[tower.type].cost * 0.7);
+        gameState.money += sellValue;
+        
+        // Remove tower
+        towerGroup.remove(tower.mesh);
+        const index = gameState.towers.indexOf(tower);
+        if (index > -1) {
+          gameState.towers.splice(index, 1);
+        }
+        
+        gameState.selectedTower = null;
+        updateUI();
+      }
+      
+      // ==================== INPUT HANDLING ====================
+      function handleCanvasClick(event) {
+        if (!gameState.isPlaying || !gameState.selectedTowerType) return;
+        
+        const rect = renderer.domElement.getBoundingClientRect();
+        const mouse = new THREE.Vector2(
+          ((event.clientX - rect.left) / rect.width) * 2 - 1,
+          -((event.clientY - rect.top) / rect.height) * 2 + 1
+        );
+        
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        
+        const intersects = raycaster.intersectObject(ground);
+        if (intersects.length > 0) {
+          const point = intersects[0].point;
+          
+          // Check if placement is valid (not on path, not too close to other towers)
+          if (isValidPlacement(point)) {
+            const config = CONFIG.towers[gameState.selectedTowerType];
+            if (gameState.money >= config.cost) {
+              gameState.money -= config.cost;
+              const tower = createTower(gameState.selectedTowerType, { x: point.x, z: point.z });
+              gameState.selectedTower = tower;
+              gameState.selectedTowerType = null;
+              document.querySelectorAll('.tower-button').forEach(btn => {
+                btn.classList.remove('selected');
+              });
+              updateUI();
+            }
+          }
+        }
+      }
+      
+      function handleTowerClick(event) {
+        const rect = renderer.domElement.getBoundingClientRect();
+        const mouse = new THREE.Vector2(
+          ((event.clientX - rect.left) / rect.width) * 2 - 1,
+          -((event.clientY - rect.top) / rect.height) * 2 + 1
+        );
+        
+        const raycaster = new THREE.Raycaster();
+        raycaster.setFromCamera(mouse, camera);
+        
+        const towerMeshes = gameState.towers.map(t => t.mesh);
+        const intersects = raycaster.intersectObjects(towerMeshes);
+        
+        if (intersects.length > 0) {
+          const clickedMesh = intersects[0].object;
+          const tower = gameState.towers.find(t => t.mesh === clickedMesh || t.mesh === clickedMesh.parent);
+          if (tower) {
+            gameState.selectedTower = tower;
+            updateUpgradePanel();
+          }
+        } else {
+          gameState.selectedTower = null;
+          updateUpgradePanel();
+        }
+      }
+      
+      function isValidPlacement(point) {
+        // Check distance from path
+        for (let i = 0; i < gameState.path.length - 1; i++) {
+          const p1 = gameState.path[i];
+          const p2 = gameState.path[i + 1];
+          
+          // Distance from point to line segment
+          const A = point.x - p1.x;
+          const B = point.z - p1.z;
+          const C = p2.x - p1.x;
+          const D = p2.z - p1.z;
+          
+          const dot = A * C + B * D;
+          const lenSq = C * C + D * D;
+          let param = -1;
+          if (lenSq !== 0) param = dot / lenSq;
+          
+          let xx, yy;
+          if (param < 0) {
+            xx = p1.x;
+            yy = p1.z;
+          } else if (param > 1) {
+            xx = p2.x;
+            yy = p2.z;
+          } else {
+            xx = p1.x + param * C;
+            yy = p1.z + param * D;
+          }
+          
+          const dx = point.x - xx;
+          const dz = point.z - yy;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          
+          if (dist < 3) return false; // Too close to path
+        }
+        
+        // Check distance from other towers
+        for (const tower of gameState.towers) {
+          const dx = point.x - tower.position.x;
+          const dz = point.z - tower.position.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
+          if (dist < 4) return false; // Too close to another tower
+        }
+        
+        return true;
+      }
+      
+      // ==================== GAME FLOW ====================
+      function startGame() {
+        document.getElementById('start-screen').classList.add('hidden');
+        document.getElementById('top-bar').classList.remove('hidden');
+        document.getElementById('tower-panel').classList.remove('hidden');
+        document.getElementById('upgrade-panel').classList.remove('hidden');
+        
+        gameState = {
+          money: CONFIG.startMoney,
+          lives: CONFIG.baseLives,
+          wave: 0,
+          score: 0,
+          isPlaying: true,
+          selectedTowerType: null,
+          selectedTower: null,
+          towers: [],
+          enemies: [],
+          projectiles: [],
+          explosions: [],
+          path: gameState.path,
+          waveInProgress: false,
+          enemiesToSpawn: 0,
+          spawnTimer: 0,
+          spawnInterval: 1000
+        };
+        
+        updateUI();
+        nextWave();
+      }
+      
+      function gameOver() {
+        gameState.isPlaying = false;
+        document.getElementById('game-over-screen').classList.remove('hidden');
+        document.getElementById('final-wave').textContent = `Vagues survivées : ${gameState.wave}`;
+        document.getElementById('final-score').textContent = `Score : ${gameState.score}`;
+      }
+      
+      function restartGame() {
+        // Clear game objects
+        gameState.towers.forEach(t => towerGroup.remove(t.mesh));
+        gameState.enemies.forEach(e => enemyGroup.remove(e.mesh));
+        gameState.projectiles.forEach(p => projectileGroup.remove(p.mesh));
+        gameState.explosions.forEach(e => explosionGroup.remove(e.mesh));
+        
+        gameState.towers = [];
+        gameState.enemies = [];
+        gameState.projectiles = [];
+        gameState.explosions = [];
+        
+        document.getElementById('game-over-screen').classList.add('hidden');
+        startGame();
+      }
+      
+      // ==================== MAIN LOOP ====================
+      let lastTime = 0;
+      
+      function animate(currentTime) {
+        requestAnimationFrame(animate);
+        
+        const deltaTime = currentTime - lastTime;
+        lastTime = currentTime;
+        
+        if (gameState.isPlaying) {
+          updateTowers(deltaTime);
+          updateProjectiles(deltaTime);
+          updateExplosions(deltaTime);
+          updateEnemies(deltaTime);
+          spawnEnemies();
+        }
+        
+        renderer.render(scene, camera);
+      }
+      
+      // ==================== INITIALIZATION ====================
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+      
+      renderer.domElement.addEventListener('click', (event) => {
+        if (event.target.closest('#tower-panel') || event.target.closest('#upgrade-panel')) {
+          return;
+        }
+        handleTowerClick(event);
+        handleCanvasClick(event);
+      });
+      
+      initThreeJS();
+      animate(0);
+    </script>
   </body>
 </html>
